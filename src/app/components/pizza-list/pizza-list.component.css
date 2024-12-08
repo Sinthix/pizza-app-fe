@@ -1,56 +1,31 @@
 .pizza-list-container {
-    padding: 20px;
-    max-width: 800px;
-    margin: auto;
+  padding: 20px;
+  max-width: 100%;
+  margin: auto;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Flexbox for the pizza cards */
+mat-list {
+  display: flex;
+  flex-wrap: wrap;  /* Allow wrapping of cards to next row */
+  gap: 20px;  /* Space between cards */
+  justify-content: center;  /* Center the cards horizontally */
+}
+
+/* Styling for each card */
+.example-card {
+  width: 300px;  /* Set a fixed width for each card */
+  margin: 10px;  /* Space around each card */
+}
+
+/* Responsive Design: Make the card take full width on smaller screens */
+@media (max-width: 768px) {
+  .example-card {
+    width: 100%;  /* Cards take up full width on smaller screens */
   }
-  
-  h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .spinner {
-    display: block;
-    margin: 20px auto;
-  }
-  
-  .error-message {
-    color: red;
-    font-size: 16px;
-    margin-bottom: 20px;
-    text-align: center;
-  }
-  
-  .no-pizzas-message {
-    text-align: center;
-    font-size: 18px;
-    color: gray;
-    margin-top: 20px;
-  }
-  
-  .pizza-image {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-left: 10px;
-  }
-  
-  mat-list-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 20px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-  }
-  
-  mat-list-item:hover {
-    background-color: #f1f1f1;
-  }
-  
-  .add-pizza-button {
-    text-align: center;
-    margin-top: 20px;
-  }
-  
+}

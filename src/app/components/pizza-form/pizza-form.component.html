@@ -1,7 +1,7 @@
 <div class="pizza-form-container">
   <h2>{{ data ? 'Edit Pizza' : 'Add Pizza' }}</h2>
 
-  <ngx-spinner *ngIf="isLoading" class="spinner"></ngx-spinner>
+  <ngx-spinner [type]="'ball-scale-multiple'" *ngIf="isLoading" class="spinner"></ngx-spinner>
   
   <div *ngIf="errorMessage" class="error-message">
     <mat-icon>error</mat-icon> {{ errorMessage }}

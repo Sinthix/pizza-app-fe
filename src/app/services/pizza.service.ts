@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Pizza } from '../models/pizza.model';
 import { Ingredient } from '../models/ingredient.model';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,17 @@ export class PizzaService {
   constructor(private http: HttpClient) {}
 
   getPizzas(): Observable<Pizza[]> {
-    return this.http.get<Pizza[]>(this.apiUrl);
+    return this.http.get<any[]>(this.apiUrl).pipe(
+      map((pizzas) =>
+        pizzas.map((pizza) => ({
+          id: +pizza.id, // Convert string to number
+          name: pizza.name,
+          sellingPrice: +pizza.selling_price, // Convert string to number
+          image: pizza.image_url,
+          ingredients: pizza.ingredients || [], // Default to empty array if missing
+        }))
+      )
+    );
   }
 
   getPizza(id: string): Observable<Pizza> {

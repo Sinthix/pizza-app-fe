@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { PizzaFormComponent } from '../pizza-form/pizza-form.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DeleteConfirmationDialogComponent } from 'src/app/delete-confirmation-dialog/delete-confirmation-dialog.component';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-pizza-list',
@@ -12,9 +13,9 @@ import { DeleteConfirmationDialogComponent } from 'src/app/delete-confirmation-d
   styleUrls: ['./pizza-list.component.css']
 })
 export class PizzaListComponent implements OnInit {
-  pizzas: Pizza[] = [];
-  isLoading: boolean = false;
-  errorMessage: string = '';
+  pizzas$: Observable<Pizza[]> = this.pizzaService.getPizzas(); 
+  isLoading = false;
+  errorMessage = '';
 
   constructor(
     private pizzaService: PizzaService,
@@ -27,18 +28,7 @@ export class PizzaListComponent implements OnInit {
   }
 
   loadPizzas(): void {
-    this.isLoading = true;
-    this.pizzaService.getPizzas().subscribe(
-      (pizzas: Pizza[]) => {
-        this.pizzas = pizzas;
-        this.isLoading = false;
-      },
-      () => {
-        this.isLoading = false;
-        this.errorMessage = 'Error loading pizzas. Please try again later.';
-        this.showErrorMessage(this.errorMessage);
-      }
-    );
+    this.pizzas$ = this.pizzaService.getPizzas();
   }
 
   showErrorMessage(message: string): void {
@@ -51,12 +41,12 @@ export class PizzaListComponent implements OnInit {
   openPizzaFormDialog(pizza?: Pizza): void {
     const dialogRef = this.dialog.open(PizzaFormComponent, {
       width: '500px',
-      data: pizza
+      data: pizza,
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.loadPizzas(); 
+        this.loadPizzas(); // Refresh the list after dialog close
       }
     });
   }
@@ -65,7 +55,7 @@ export class PizzaListComponent implements OnInit {
     const pizzaIdString = pizzaId.toString();
     const dialogRef = this.dialog.open(DeleteConfirmationDialogComponent, {
       width: '300px',
-      data: { pizzaId }
+      data: { pizzaId },
     });
 
     dialogRef.afterClosed().subscribe((confirmed) => {
@@ -73,9 +63,11 @@ export class PizzaListComponent implements OnInit {
         this.pizzaService.deletePizza(pizzaIdString).subscribe(
           () => {
             this.loadPizzas();
-            this.snackBar.open('Pizza deleted successfully!', 'Close', { duration: 3000 });
+            this.snackBar.open('Pizza deleted successfully!', 'Close', {
+              duration: 3000,
+            });
           },
-          (error) => {
+          () => {
             this.showErrorMessage('Error deleting pizza. Please try again later.');
           }
         );

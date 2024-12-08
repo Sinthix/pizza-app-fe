@@ -1,60 +1,72 @@
 .ingredient-list-container {
-    padding: 20px;
-    max-width: 800px;
-    margin: auto;
-  }
-  
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  
-  button {
-    margin: 10px;
-  }
-  
-  .ingredient-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .ingredient-item img {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    margin-right: 20px;
-  }
-  
-  .ingredient-info {
-    flex-grow: 1;
-  }
-  
-  .mat-icon-button {
-    margin-left: 10px;
-  }
-  
-  .error-message {
-    color: red;
-    font-size: 16px;
-    margin: 20px 0;
-  }
-  
-  .no-ingredients {
-    text-align: center;
-    font-size: 18px;
-    color: #555;
-  }
-  
-  .spinner {
-    display: block;
-    margin: 20px auto;
-  }
-  
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.ingredient-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Responsive grid */
+  gap: 20px;
+}
+
+.ingredient-card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.ingredient-image {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 16px;
+}
+
+mat-card-header {
+  display: flex;
+  align-items: center;
+}
+
+mat-card-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+mat-card-subtitle {
+  font-size: 14px;
+  color: #777;
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.no-ingredients {
+  text-align: center;
+  font-size: 18px;
+  color: gray;
+  margin-top: 20px;
+}
+
+.spinner {
+  display: block;
+  margin: 20px auto;
+}
+
+.error-message {
+  color: red;
+  font-size: 16px;
+  margin-bottom: 20px;
+  text-align: center;
+}
