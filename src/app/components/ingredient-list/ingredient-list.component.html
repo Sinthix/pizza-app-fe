@@ -1,1 +1,20 @@
-<p>ingredient-list works!</p>
+<div class="ingredient-list">
+    <ngx-spinner *ngIf="isLoading"></ngx-spinner>
+    
+    <mat-card>
+      <h2>Ingredients</h2>
+      <button mat-raised-button color="primary" (click)="openAddIngredientForm()">Add Ingredient</button>
+  
+      <mat-list>
+        <mat-list-item *ngFor="let ingredient of ingredients">
+          <img mat-list-avatar [src]="ingredient.imageUrl" alt="{{ ingredient.name }}">
+          <div mat-line>{{ ingredient.name }}</div>
+          <div mat-line>Cost: {{ ingredient.costPrice | currency:'EUR' }}</div>
+          <button mat-icon-button color="warn" (click)="deleteIngredient(ingredient.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-list-item>
+      </mat-list>
+    </mat-card>
+  </div>
+  

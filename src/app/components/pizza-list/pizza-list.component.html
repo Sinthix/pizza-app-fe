@@ -1,1 +1,24 @@
-<p>pizza-list works!</p>
+<div class="pizza-list">
+    <h2>Pizza Catalog</h2>
+  
+    <button mat-raised-button color="primary" routerLink="/pizzas/add">
+      Add New Pizza
+    </button>
+  
+    <ngx-spinner *ngIf="isLoading"></ngx-spinner>
+  
+    <mat-list *ngIf="!isLoading">
+      <mat-list-item *ngFor="let pizza of pizzas">
+        <img matListAvatar [src]="pizza.image" alt="{{ pizza.name }}" />
+        <h3 matLine>{{ pizza.name }}</h3>
+        <p matLine>Selling Price: {{ pizza.sellingPrice | currency }}</p>
+        <button mat-icon-button (click)="editPizza(pizza.id)">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deletePizza(pizza.id)">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-list-item>
+    </mat-list>
+  </div>
+  

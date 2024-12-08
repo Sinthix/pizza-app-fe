@@ -1,1 +1,42 @@
-<p>pizza-form works!</p>
+<div class="pizza-form">
+    <h2>{{ isEditMode ? 'Edit Pizza' : 'Add Pizza' }}</h2>
+  
+    <form [formGroup]="pizzaForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Pizza Name</mat-label>
+        <input matInput formControlName="name" />
+        <mat-error *ngIf="pizzaForm.get('name')?.invalid && pizzaForm.get('name')?.touched">
+          Pizza name must be between 2 and 50 characters and not contain special characters.
+        </mat-error>
+      </mat-form-field>
+  
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Selling Price</mat-label>
+        <input matInput type="number" formControlName="sellingPrice" />
+        <mat-error *ngIf="pizzaForm.get('sellingPrice')?.invalid && pizzaForm.get('sellingPrice')?.touched">
+          Selling price must be a positive number.
+        </mat-error>
+      </mat-form-field>
+  
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Image URL</mat-label>
+        <input matInput formControlName="imageUrl" />
+      </mat-form-field>
+  
+      <mat-chip-list formControlName="ingredients" #chipList>
+        <mat-chip *ngFor="let ingredient of ingredients" [selectable]="true" [removable]="true" (removed)="removeIngredient(ingredient)">
+          {{ ingredient.name }}
+          <mat-icon matChipRemove>cancel</mat-icon>
+        </mat-chip>
+        <input [matChipInputFor]="chipList" (matChipInputTokenEnd)="addIngredient($event)" />
+      </mat-chip-list>
+  
+      <div class="button-group">
+        <button mat-raised-button color="primary" type="submit" [disabled]="pizzaForm.invalid">
+          {{ isEditMode ? 'Update Pizza' : 'Create Pizza' }}
+        </button>
+        <button mat-raised-button color="warn" type="button" routerLink="/pizzas">Cancel</button>
+      </div>
+    </form>
+  </div>
+  

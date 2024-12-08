@@ -1,9 +1,9 @@
 import { Ingredient } from './ingredient.model';
 
 export interface Pizza {
-  id: number;
+  id?: number;
   name: string;
   sellingPrice: number;
-  imageUrl: string;
+  image?: string;
   ingredients: Ingredient[];
 }
