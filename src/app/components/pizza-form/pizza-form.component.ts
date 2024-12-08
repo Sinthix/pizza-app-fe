@@ -1,107 +1,89 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
+import { PizzaService } from '../../services/pizza.service';
+import { Pizza } from '../../models/pizza.model';
+import { Ingredient } from '../../models/ingredient.model';
+import { IngredientService } from '../../services/ingredient.service';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { PizzaService } from 'src/app/services/pizza.service';
-import { IngredientService } from 'src/app/services/ingredient.service';
-import { Pizza } from 'src/app/models/pizza.model';
-import { Ingredient } from 'src/app/models/ingredient.model';
 
 @Component({
   selector: 'app-pizza-form',
   templateUrl: './pizza-form.component.html',
-  styleUrls: ['./pizza-form.component.css'],
+  styleUrls: ['./pizza-form.component.css']
 })
 export class PizzaFormComponent implements OnInit {
-  pizzaForm: FormGroup;
+  pizzaForm!: FormGroup;
   ingredients: Ingredient[] = [];
-  isEditMode = false;
-  pizzaId: number | null = null;
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
   constructor(
-    private fb: FormBuilder,
     private pizzaService: PizzaService,
     private ingredientService: IngredientService,
-    private router: Router,
-    private route: ActivatedRoute
-  ) {
-    this.pizzaForm = this.fb.group({
-      name: [
-        '',
-        [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(/^[^{}[\]".!]+$/)],
-      ],
-      sellingPrice: [0, [Validators.required, Validators.min(0)]],
-      imageUrl: [''],
-      ingredients: [[]],
-    });
-  }
+    private fb: FormBuilder,
+    private dialogRef: MatDialogRef<PizzaFormComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: Pizza | null
+  ) {}
 
   ngOnInit(): void {
     this.loadIngredients();
+    this.initializeForm();
+  }
 
-    this.route.paramMap.subscribe((params) => {
-      const id = params.get('id');
-      if (id) {
-        this.isEditMode = true;
-        this.pizzaId = +id;
-        this.loadPizza();
-      }
-    });
+   initializeForm(): void {
+    if (this.data) {
+      this.pizzaForm = this.fb.group({
+        name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+        sellingPrice: ['', [Validators.required, Validators.pattern('^[0-9]*\.?[0-9]{0,2}$')]], // Floating-point validation
+        image: ['', Validators.required],
+        ingredients: [[]]
+      });
+    } else {
+      this.pizzaForm = this.fb.group({
+        name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+        sellingPrice: ['', [Validators.required, Validators.min(0)]],
+        image: [''],
+        ingredients: [[], [Validators.required, Validators.minLength(1)]]
+      });
+    }
   }
 
   loadIngredients(): void {
-    this.ingredientService.getIngredients().subscribe((data) => {
-      this.ingredients = data;
-    });
-  }
-
-  loadPizza(): void {
-    if (this.pizzaId) {
-      this.pizzaService.getPizzaById(this.pizzaId).subscribe((pizza) => {
-        this.pizzaForm.patchValue({
-          name: pizza.name,
-          sellingPrice: pizza.sellingPrice,
-          imageUrl: pizza.imageUrl,
-          ingredients: pizza.ingredients,
-        });
-      });
-    }
+    this.isLoading = true;
+    this.ingredientService.getIngredients().subscribe(
+      (data: Ingredient[]) => {
+        this.ingredients = data;
+        this.isLoading = false;
+      },
+      (error) => {
+        this.isLoading = false;
+        this.errorMessage = 'Error loading ingredients. Please try again later.';
+      }
+    );
   }
 
   onSubmit(): void {
-    const pizza: Pizza = this.pizzaForm.value;
-
-    if (this.isEditMode && this.pizzaId) {
-      this.pizzaService.updatePizza(this.pizzaId, pizza).subscribe(() => {
-        this.router.navigate(['/pizzas']);
-      });
-    } else {
-      this.pizzaService.createPizza(pizza).subscribe(() => {
-        this.router.navigate(['/pizzas']);
-      });
-    }
-  }
-
-  addIngredient(event: any): void {
-    const input = event.input;
-    const value = event.value;
-
-    if ((value || '').trim()) {
-      const ingredient = this.ingredients.find((ing) => ing.name === value.trim());
-      if (ingredient) {
-        const currentIngredients = this.pizzaForm.get('ingredients')?.value;
-        this.pizzaForm.get('ingredients')?.setValue([...currentIngredients, ingredient]);
+    if (this.pizzaForm.valid) {
+      const pizzaData = this.pizzaForm.value;
+      if (this.data) {
+        this.pizzaService.updatePizza(String(this.data.id), pizzaData).subscribe(
+          () => this.dialogRef.close(true),
+          (error) => {
+            this.errorMessage = 'Error updating pizza. Please try again later.';
+          }
+        );
+      } else {
+        this.pizzaService.addPizza(pizzaData).subscribe(
+          () => this.dialogRef.close(true),
+          (error) => {
+            this.errorMessage = 'Error creating pizza. Please try again later.';
+          }
+        );
       }
     }
-
-    if (input) {
-      input.value = '';
-    }
   }
 
-  removeIngredient(ingredient: Ingredient): void {
-    const currentIngredients = this.pizzaForm.get('ingredients')?.value.filter(
-      (ing: Ingredient) => ing.id !== ingredient.id
-    );
-    this.pizzaForm.get('ingredients')?.setValue(currentIngredients);
+  closeDialog(): void {
+    this.dialogRef.close();
   }
 }

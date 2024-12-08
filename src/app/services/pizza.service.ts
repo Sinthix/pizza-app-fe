@@ -2,36 +2,66 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Pizza } from '../models/pizza.model';
+import { Ingredient } from '../models/ingredient.model';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class PizzaService {
-  private readonly API_URL = 'http://localhost:8000/api/pizzas'; // Update to match your PHP backend
+  private apiUrl = 'http://localhost:80/api/pizzas';
 
   constructor(private http: HttpClient) {}
 
   getPizzas(): Observable<Pizza[]> {
-    return this.http.get<Pizza[]>(this.API_URL);
+    return this.http.get<Pizza[]>(this.apiUrl);
   }
 
-  getPizzaById(id: number): Observable<Pizza> {
-    return this.http.get<Pizza>(`${this.API_URL}/${id}`);
+  getPizza(id: string): Observable<Pizza> {
+    return this.http.get<Pizza>(`${this.apiUrl}/${id}`);
   }
 
-  createPizza(pizza: Pizza): Observable<Pizza> {
-    return this.http.post<Pizza>(this.API_URL, pizza);
+  addPizza(pizza: Pizza): Observable<Pizza> {
+    return this.http.post<Pizza>(this.apiUrl, pizza);
   }
 
-  updatePizza(pizza: Pizza): Observable<Pizza> {
-    return this.http.put<Pizza>(`${this.API_URL}/${id}`, pizza);
+  updatePizza(id: string, pizza: Pizza): Observable<Pizza> {
+    return this.http.put<Pizza>(`${this.apiUrl}/${id}`, pizza);
   }
 
-  deletePizza(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/${id}`);
+  deletePizza(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  randomizePizza(): Observable<Pizza> {
-    return this.http.get<Pizza>(`${this.API_URL}/randomize`);
+  generateRandomPizza(ingredients: Ingredient[]): Pizza {
+    const selectedIngredients: Ingredient[] = [];
+    const randomPizza: Pizza = {
+      id: 0,  
+      name: 'Random Pizza',
+      sellingPrice: 0,
+      image: 'random-pizza.jpg',  
+      ingredients: []
+    };
+
+    ingredients.forEach((ingredient) => {
+      const chance = Math.random() * 100;
+      if (chance <= ingredient.randomisationPercentage) {
+        selectedIngredients.push(ingredient);
+      }
+    });
+
+    if (selectedIngredients.length === 0) {
+      selectedIngredients.push(ingredients[0]);
+    }
+
+    randomPizza.ingredients = selectedIngredients;
+
+    let totalCost = 0;
+    randomPizza.ingredients.forEach((ingredient) => {
+      totalCost += ingredient.costPrice;
+    });
+
+    randomPizza.sellingPrice = totalCost + totalCost * 0.5;
+
+    return randomPizza;
   }
 }

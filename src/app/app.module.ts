@@ -8,6 +8,7 @@ import { IngredientListComponent } from './components/ingredient-list/ingredient
 import { IngredientFormComponent } from './components/ingredient-form/ingredient-form.component';
 import { PizzaListComponent } from './components/pizza-list/pizza-list.component';
 import { PizzaFormComponent } from './components/pizza-form/pizza-form.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,6 +22,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialogModule } from '@angular/material/dialog';
+import { DeleteConfirmationDialogComponent } from './delete-confirmation-dialog/delete-confirmation-dialog.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +31,8 @@ import { MatChipsModule } from '@angular/material/chips';
     IngredientListComponent,
     IngredientFormComponent,
     PizzaListComponent,
-    PizzaFormComponent
+    PizzaFormComponent,
+    DeleteConfirmationDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -37,6 +41,7 @@ import { MatChipsModule } from '@angular/material/chips';
     FormsModule,
     HttpClientModule,
     AppRoutingModule,
+    ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
     MatListModule,
@@ -44,6 +49,7 @@ import { MatChipsModule } from '@angular/material/chips';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    MatDialogModule,
     MatSnackBarModule,
     MatChipsModule,
     NgxSpinnerModule,

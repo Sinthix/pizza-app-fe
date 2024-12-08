@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { IngredientService } from '../../services/ingredient.service';
 import { Ingredient } from '../../models/ingredient.model';
+import { MatDialog } from '@angular/material/dialog';
+import { IngredientFormComponent } from '../ingredient-form/ingredient-form.component';
 
 @Component({
   selector: 'app-ingredient-list',
@@ -9,29 +11,65 @@ import { Ingredient } from '../../models/ingredient.model';
 })
 export class IngredientListComponent implements OnInit {
   ingredients: Ingredient[] = [];
-  isLoading = false;
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
-  constructor(private ingredientService: IngredientService) {}
+  constructor(private ingredientService: IngredientService, private dialog: MatDialog) {}
 
   ngOnInit(): void {
-    this.fetchIngredients();
+    this.loadIngredients();
   }
 
-  fetchIngredients(): void {
+  loadIngredients(): void {
     this.isLoading = true;
-    this.ingredientService.getIngredients().subscribe({
-      next: (data) => { this.ingredients = data; },
-      error: (err) => { alert('Error fetching ingredients!'); },
-      complete: () => { this.isLoading = false; }
+    this.ingredientService.getIngredients().subscribe(
+      (data: Ingredient[]) => {
+        this.ingredients = data;
+        this.isLoading = false;
+      },
+      (error) => {
+        this.isLoading = false;
+        this.errorMessage = 'Error loading ingredients. Please try again later.';
+      }
+    );
+  }
+
+  openAddIngredientDialog(): void {
+    const dialogRef = this.dialog.open(IngredientFormComponent, {
+      width: '400px',
+      data: null  
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadIngredients(); 
+      }
     });
   }
 
-  openAddIngredientForm(): void {
+  openEditIngredientDialog(ingredient: Ingredient): void {
+    const dialogRef = this.dialog.open(IngredientFormComponent, {
+      width: '400px',
+      data: ingredient 
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadIngredients(); 
+      }
+    });
   }
 
-  deleteIngredient(id: number): void {
-    this.ingredientService.deleteIngredient(id).subscribe(() => {
-      this.fetchIngredients();
-    });
+  deleteIngredient(id: string): void {
+    if (confirm('Are you sure you want to delete this ingredient?')) {
+      this.ingredientService.deleteIngredient(id).subscribe(
+        () => {
+          this.loadIngredients(); 
+        },
+        (error) => {
+          this.errorMessage = 'Error deleting ingredient. Please try again later.';
+        }
+      );
+    }
   }
 }

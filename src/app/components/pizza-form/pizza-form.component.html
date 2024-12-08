@@ -1,42 +1,46 @@
-<div class="pizza-form">
-    <h2>{{ isEditMode ? 'Edit Pizza' : 'Add Pizza' }}</h2>
+<div class="pizza-form-container">
+  <h2>{{ data ? 'Edit Pizza' : 'Add Pizza' }}</h2>
+
+  <ngx-spinner *ngIf="isLoading" class="spinner"></ngx-spinner>
   
-    <form [formGroup]="pizzaForm" (ngSubmit)="onSubmit()">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Pizza Name</mat-label>
-        <input matInput formControlName="name" />
-        <mat-error *ngIf="pizzaForm.get('name')?.invalid && pizzaForm.get('name')?.touched">
-          Pizza name must be between 2 and 50 characters and not contain special characters.
-        </mat-error>
-      </mat-form-field>
-  
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Selling Price</mat-label>
-        <input matInput type="number" formControlName="sellingPrice" />
-        <mat-error *ngIf="pizzaForm.get('sellingPrice')?.invalid && pizzaForm.get('sellingPrice')?.touched">
-          Selling price must be a positive number.
-        </mat-error>
-      </mat-form-field>
-  
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Image URL</mat-label>
-        <input matInput formControlName="imageUrl" />
-      </mat-form-field>
-  
-      <mat-chip-list formControlName="ingredients" #chipList>
-        <mat-chip *ngFor="let ingredient of ingredients" [selectable]="true" [removable]="true" (removed)="removeIngredient(ingredient)">
-          {{ ingredient.name }}
-          <mat-icon matChipRemove>cancel</mat-icon>
-        </mat-chip>
-        <input [matChipInputFor]="chipList" (matChipInputTokenEnd)="addIngredient($event)" />
-      </mat-chip-list>
-  
-      <div class="button-group">
-        <button mat-raised-button color="primary" type="submit" [disabled]="pizzaForm.invalid">
-          {{ isEditMode ? 'Update Pizza' : 'Create Pizza' }}
-        </button>
-        <button mat-raised-button color="warn" type="button" routerLink="/pizzas">Cancel</button>
-      </div>
-    </form>
+  <div *ngIf="errorMessage" class="error-message">
+    <mat-icon>error</mat-icon> {{ errorMessage }}
   </div>
-  
+
+  <form [formGroup]="pizzaForm" (ngSubmit)="onSubmit()">
+    <mat-form-field class="full-width" appearance="fill">
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" required />
+      <mat-error *ngIf="pizzaForm.controls['name'].hasError('required')">Name is required</mat-error>
+      <mat-error *ngIf="pizzaForm.controls['name'].hasError('minlength')">Name must be at least 2 characters</mat-error>
+      <mat-error *ngIf="pizzaForm.controls['name'].hasError('maxlength')">Name cannot exceed 50 characters</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="full-width" appearance="fill">
+      <mat-label>Selling Price (€)</mat-label>
+      <input matInput type="number" formControlName="sellingPrice" required />
+      <mat-error *ngIf="pizzaForm.controls['sellingPrice'].hasError('required')">Selling Price is required</mat-error>
+      <mat-error *ngIf="pizzaForm.controls['sellingPrice'].hasError('min')">Selling Price must be greater than 0</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="full-width" appearance="fill">
+      <mat-label>Image URL</mat-label>
+      <input matInput formControlName="image" />
+    </mat-form-field>
+
+    <mat-form-field class="full-width" appearance="fill">
+      <mat-label>Ingredients</mat-label>
+      <mat-select formControlName="ingredients" multiple required>
+        <mat-option *ngFor="let ingredient of ingredients" [value]="ingredient.id">
+          {{ ingredient.name }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="pizzaForm.controls['ingredients'].hasError('required')">At least one ingredient is required</mat-error>
+    </mat-form-field>
+
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="pizzaForm.invalid">Save</button>
+      <button mat-raised-button color="accent" type="button" (click)="closeDialog()">Cancel</button>
+    </div>
+  </form>
+</div>

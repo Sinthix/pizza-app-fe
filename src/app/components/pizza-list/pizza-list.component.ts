@@ -1,7 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { PizzaService } from 'src/app/services/pizza.service';
-import { Pizza } from 'src/app/models/pizza.model';
-import { NgxSpinnerService } from 'ngx-spinner';
+import { PizzaService } from '../../services/pizza.service';
+import { Pizza } from '../../models/pizza.model';
+import { MatDialog } from '@angular/material/dialog';
+import { PizzaFormComponent } from '../pizza-form/pizza-form.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { DeleteConfirmationDialogComponent } from 'src/app/delete-confirmation-dialog/delete-confirmation-dialog.component';
 
 @Component({
   selector: 'app-pizza-list',
@@ -10,11 +13,13 @@ import { NgxSpinnerService } from 'ngx-spinner';
 })
 export class PizzaListComponent implements OnInit {
   pizzas: Pizza[] = [];
-  isLoading = false;
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
   constructor(
     private pizzaService: PizzaService,
-    private spinner: NgxSpinnerService
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -23,30 +28,58 @@ export class PizzaListComponent implements OnInit {
 
   loadPizzas(): void {
     this.isLoading = true;
-    this.spinner.show();
     this.pizzaService.getPizzas().subscribe(
-      (data: Pizza[]) => {
-        this.pizzas = data;
-        this.spinner.hide();
+      (pizzas: Pizza[]) => {
+        this.pizzas = pizzas;
         this.isLoading = false;
       },
-      (error) => {
-        console.error('Error loading pizzas:', error);
-        this.spinner.hide();
+      () => {
         this.isLoading = false;
+        this.errorMessage = 'Error loading pizzas. Please try again later.';
+        this.showErrorMessage(this.errorMessage);
       }
     );
   }
 
-  editPizza(id: number): void {
-    window.location.href = `/pizzas/edit/${id}`;
+  showErrorMessage(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['error-snackbar'],
+    });
   }
 
-  deletePizza(id: number): void {
-    if (confirm('Are you sure you want to delete this pizza?')) {
-      this.pizzaService.deletePizza(id).subscribe(() => {
-        this.pizzas = this.pizzas.filter(p => p.id !== id);
-      });
-    }
+  openPizzaFormDialog(pizza?: Pizza): void {
+    const dialogRef = this.dialog.open(PizzaFormComponent, {
+      width: '500px',
+      data: pizza
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadPizzas(); 
+      }
+    });
+  }
+
+  deletePizza(pizzaId: number): void {
+    const pizzaIdString = pizzaId.toString();
+    const dialogRef = this.dialog.open(DeleteConfirmationDialogComponent, {
+      width: '300px',
+      data: { pizzaId }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed) => {
+      if (confirmed) {
+        this.pizzaService.deletePizza(pizzaIdString).subscribe(
+          () => {
+            this.loadPizzas();
+            this.snackBar.open('Pizza deleted successfully!', 'Close', { duration: 3000 });
+          },
+          (error) => {
+            this.showErrorMessage('Error deleting pizza. Please try again later.');
+          }
+        );
+      }
+    });
   }
 }
